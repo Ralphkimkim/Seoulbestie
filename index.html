@@ -13,19 +13,25 @@
     .lang-selector { text-align: right; margin-bottom: 20px; }
     .readonly-input { background-color: #eee; }
 
-    /* 🌟 주소 검색 모달 팝업 레이아웃 */
+    /* 🌟 주소 검색 모달 팝업 레이아웃 및 스타일 보완 */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-    .modal-content { background-color: #fff; margin: 15% auto; padding: 20px; border-radius: 10px; max-width: 450px; position: relative; }
+    .modal-content { background-color: #fff; margin: 15% auto; padding: 25px; border-radius: 10px; max-width: 450px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
     .close-btn:hover { color: #000; }
-    .search-results { max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px; }
-    .result-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
+
+    /* 모달 내부 입력창 및 버튼 디자인 통일 */
+    .modal-content input[type="text"] { width: 75%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 0; }
+    .modal-content input[type="button"] { width: 22%; padding: 10px; background-color: #007BFF ￼; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .modal-content input[type="button"]:hover { background-color: #0056B3 ￼; }
+
+    .search-results { max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; }
+    .result-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; text-align: left; }
     .result-item:hover { background-color: #F1F1F1 ￼; }
     .result-item:last-child { border-bottom: none; }
-    .no-result { padding: 15px; text-align: center; color: #777; }
+    .no-result { padding: 15px; text-align: center; color: #777; font-size: 14px; line-height: 1.5; }
+    .error-text { color: #DC3545 ￼; font-weight: bold; }
   </style>
 
-  <!-- 🌟 구글 맵스 Places API 로드 (YOUR_API_KEY_HERE 부분에 API 키를 붙여넣으세요) -->
   <script async src="maps.googleapis.com/maps/api/js?libraries=places&callback=initMapService&…"></script>
 </head>
 <body>
@@ -74,7 +80,6 @@
       </datalist>
     </div>
 
-    <!-- 🌟 구글 주소 검색형 구조 (카카오와 결합된 최적의 레이아웃) -->
     <div class="input-group">
       <label id="lblAddress">주소 :</label>
       <div style="display: flex; gap: 5px; margin-bottom: 5px;">
@@ -89,14 +94,13 @@
   </form>
 </div>
 
-<!-- 🌟 구글 주소 검색 팝업창 (모달) -->
 <div id="searchModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeAddressSearch()">&times;</span>
-    <h3 id="modalTitle" style="margin-top:0;">구글 주소 검색</h3>
-    <div style="display: flex; gap: 5px;">
-      <input type="text" id="searchQuery" placeholder="호텔 이름 또는 주소 입력 (영문/중문 가능)" style="margin-bottom:0;" onkeypress="if(event.keyCode==13){searchGooglePlaces(); return false;}">
-      <input type="button" id="btnModalSearch" onclick="searchGooglePlaces()" value="검색" style="padding: 10px 20px;">
+    <h3 id="modalTitle" style="margin-top:0; text-align: left;">구글 주소 검색</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <input type="text" id="searchQuery" placeholder="호텔 이름 또는 주소 입력 (영문/중문 가능)" onkeypress="if(event.keyCode==13){searchGooglePlaces(); return false;}">
+      <input type="button" id="btnModalSearch" onclick="searchGooglePlaces()" value="검색">
     </div>
     <div id="searchResults" class="search-results">
       <div class="no-result" id="modalStatus">주소 또는 건물명을 입력 후 검색 버튼을 눌러주세요.</div>
@@ -188,78 +192,100 @@
     document.getElementById("detailAddress").placeholder = t.detailPlace;
     document.getElementById("btnSubmit").innerText = t.btnSubmit;
 
-    // 모달창 내 언어 번역
     document.getElementById("modalTitle").innerText = t.modalTitle;
     document.getElementById("searchQuery").placeholder = t.modalPlace;
     document.getElementById("btnModalSearch").value = t.modalBtn;
     document.getElementById("modalStatus").innerText = t.modalStatus;
   }
-
-  // 🌟 구글 맵스 주소 검색 엔진(TextSearch) 로드
+  // 🌟 구글 API 로드 확인 및 초기화
   function initMapService() {
-    // 백그라운드에 구글 Places Service를 세팅해 둡니다
-    const dummyDiv = document.createElement('div');
-    placesService = new google.maps.places.PlacesService(dummyDiv);
+    try {
+      const dummyDiv = document.createElement('div');
+      placesService = new google.maps.places.PlacesService(dummyDiv);
+    } catch (e) {
+      console.error("구글 맵 서비스 초기화 실패:", e);
+    }
   }
 
-  // 팝업 열기
+  // API 키 자체가 만료되었거나 결제 등록 오류 시 자동으로 경고창을 띄워주는 이벤트 감지
+  window.gm_authFailure = function() {
+    alert("구글 지도 API 인증 실패! 다음을 확인해 주세요:\n1. 구글 클라우드에 해외 결제 카드가 등록되었는지\n2. API 키를 코드 상단에 올바르게 입력했는지");
+  };
+
   function openAddressSearch() {
     document.getElementById("searchModal").style.display = "block";
     document.getElementById("searchQuery").focus();
   }
 
-  // 팝업 닫기
   function closeAddressSearch() {
     document.getElementById("searchModal").style.display = "none";
-    // 팝업 닫힐 때 검색 기록 초기화
     document.getElementById("searchQuery").value = "";
     document.getElementById("searchResults").innerHTML = `<div class="no-result" id="modalStatus">${translations[currentLang].modalStatus}</div>`;
   }
 
-  // 🌟 핵심: 사용자가 입력한 검색어로 구글에서 결과 찾아오기
+  // 🌟 검색 실행 함수 (에러 트래킹 기능 보완)
   function searchGooglePlaces() {
     const query = document.getElementById("searchQuery").value;
+    const resultsContainer = document.getElementById("searchResults");
+
     if (!query.trim()) return;
 
-    const resultsContainer = document.getElementById("searchResults");
+    // 1. 구글 서비스 로드 여부 검사
+    if (typeof google === 'undefined' || !placesService) {
+      resultsContainer.innerHTML = `
+        <div class="no-result error-text">
+          ⚠️ 구글 서비스 로드 실패!<br>
+          HTML 코드 상단의 API 키를 올바르게 입력하셨는지 확인해 주세요.
+        </div>`;
+      return;
+    }
+
     resultsContainer.innerHTML = `<div class="no-result">${translations[currentLang].searching}</div>`;
 
-    // 한국 호텔이나 목적지가 중심이 되도록 타겟팅 반경 세팅 (대한민국 위도/경도)
+    // 2. 한국 주소를 정교하게 타겟팅하기 위해 위경도 검색 필터 표준화
     const request = {
       query: query,
-      fields: ['name', 'formatted_address', 'address_components'],
-      locationBias: { lat: 35.907757, lng: 127.766922 } // 한국 주소 가중치 부여
+      location: new google.maps.LatLng(37.5665, 126.9780), // 서울 중심 좌표
+      radius: 50000 // 반경 50km
     };
 
+    // 3. 구글 검색 요청 실행
     placesService.textSearch(request, function(results, status) {
+      // 성공했을 때 목록 그리기
       if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
-        resultsContainer.innerHTML = ""; // 기존 결과 삭제
+        resultsContainer.innerHTML = "";
 
-        // 찾은 주소 목록들 화면에 뿌리기
         results.forEach(place => {
           const item = document.createElement("div");
           item.className = "result-item";
-
-          // 장소 이름(호텔명) + 상세 주소 매칭
           item.innerHTML = `<strong>${place.name}</strong><br><span style="color:#666; font-size:12px;">${place.formatted_address}</span>`;
 
-          // 사용자가 검색 결과 중 하나를 콕 찍었을 때의 이벤트
           item.onclick = function() {
             selectAddress(place);
           };
           resultsContainer.appendChild(item);
         });
       } else {
-        resultsContainer.innerHTML = `<div class="no-result">${translations[currentLang].noResults}</div>`;
+        // 🌟 에러 발생 시 단순 '검색 중'에 멈추지 않고, 구글이 뱉은 에러 코드를 화면에 직접 뿌려줍니다.
+        let errorMsg = translations[currentLang].noResults;
+        if (status === "REQUEST_DENIED") {
+          errorMsg = `
+            <span class="error-text">⚠️ 구글 서버 거절 (REQUEST_DENIED)</span><br>
+            구글 클라우드 콘솔에서 <strong>'Places API'</strong> 스위치가 켜져 있는지 반드시 확인해 주세요.`;
+        } else if (status === "OVER_QUERY_LIMIT") {
+          errorMsg = `<span class="error-text">⚠️ 일일 할당량 초과 (결제 카드 미등록 상태)</span>`;
+        } else if (status !== "ZERO_RESULTS") {
+          errorMsg = `<span class="error-text">⚠️ 구글 에러 발생 (Status: ${status})</span>`;
+        }
+
+        resultsContainer.innerHTML = `<div class="no-result">${errorMsg}</div>`;
       }
     });
   }
 
-  // 🌟 최종 선택된 주소 정보 폼 입력칸에 파싱해 넣기
   function selectAddress(place) {
     let postcode = "";
 
-    // 우편번호 찾아서 획득하기
     if (place.address_components) {
       for (const component of place.address_components) {
         if (component.types.includes("postal_code")) {
@@ -269,11 +295,9 @@
       }
     }
 
-    // 인풋창에 값 주입
     document.getElementById("address").value = place.formatted_address;
-    document.getElementById("postcode").value = postcode ? postcode : "N/A"; // 우편번호 없는 경우 대비
+    document.getElementById("postcode").value = postcode ? postcode : "N/A";
 
-    // 팝업창을 닫고 상세주소창으로 커서 이동
     closeAddressSearch();
     document.getElementById("detailAddress").focus();
   }
