@@ -2,19 +2,31 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>업그레이드된 입력 페이지 (구글 맵스)</title>
+  <title>구글 주소 검색 입력 페이지</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background-color: #F9F9F9 ￼; }
     .container { background-color: white; padding: 30px; border-radius: 10px; max-width: 500px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     .input-group { margin-bottom: 20px; }
     label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
     input[type="text"], select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
-    button { padding: 10px 15px; background-color: #007BFF ￼; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    input[type="button"], button { padding: 10px 15px; background-color: #007BFF ￼; color: white; border: none; border-radius: 5px; cursor: pointer; }
     .lang-selector { text-align: right; margin-bottom: 20px; }
     .readonly-input { background-color: #eee; }
+
+    /* 🌟 주소 검색 모달 팝업 레이아웃 */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: #fff; margin: 15% auto; padding: 20px; border-radius: 10px; max-width: 450px; position: relative; }
+    .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
+    .close-btn:hover { color: #000; }
+    .search-results { max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px; }
+    .result-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
+    .result-item:hover { background-color: #F1F1F1 ￼; }
+    .result-item:last-child { border-bottom: none; }
+    .no-result { padding: 15px; text-align: center; color: #777; }
   </style>
 
-  <script async src="maps.googleapis.com/maps/api/js?libraries=places&callback=initAutocomplete&…"></script>
+  <!-- 🌟 구글 맵스 Places API 로드 (YOUR_API_KEY_HERE 부분에 API 키를 붙여넣으세요) -->
+  <script async src="maps.googleapis.com/maps/api/js?libraries=places&callback=initMapService&…"></script>
 </head>
 <body>
 
@@ -62,24 +74,37 @@
       </datalist>
     </div>
 
+    <!-- 🌟 구글 주소 검색형 구조 (카카오와 결합된 최적의 레이아웃) -->
     <div class="input-group">
       <label id="lblAddress">주소 :</label>
-
-      <input type="text" id="autocomplete-input" placeholder="Search address (주소 검색)">
-
-      <input type="text" id="postcode" name="postcode" placeholder="Zipcode (우편번호)" readonly class="readonly-input">
-
-      <input type="text" id="address" name="address" placeholder="Basic Address (기본 주소)" readonly class="readonly-input">
-
-      <input type="text" id="detailAddress" name="detailAddress" placeholder="Detailed Address (상세 주소 입력)" style="margin-bottom: 0;">
+      <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+        <input type="text" id="postcode" name="postcode" placeholder="우편번호" readonly style="flex: 1; margin-bottom: 0;" class="readonly-input">
+        <input type="button" id="btnSearch" onclick="openAddressSearch()" value="주소 검색">
+      </div>
+      <input type="text" id="address" name="address" placeholder="기본 주소" readonly style="margin-bottom: 5px;" class="readonly-input">
+      <input type="text" id="detailAddress" name="detailAddress" placeholder="상세 주소를 입력해주세요" style="margin-bottom: 0;">
     </div>
 
     <button type="submit" id="btnSubmit" style="width: 100%; font-size: 16px;">제출하기</button>
   </form>
 </div>
 
+<!-- 🌟 구글 주소 검색 팝업창 (모달) -->
+<div id="searchModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeAddressSearch()">&times;</span>
+    <h3 id="modalTitle" style="margin-top:0;">구글 주소 검색</h3>
+    <div style="display: flex; gap: 5px;">
+      <input type="text" id="searchQuery" placeholder="호텔 이름 또는 주소 입력 (영문/중문 가능)" style="margin-bottom:0;" onkeypress="if(event.keyCode==13){searchGooglePlaces(); return false;}">
+      <input type="button" id="btnModalSearch" onclick="searchGooglePlaces()" value="검색" style="padding: 10px 20px;">
+    </div>
+    <div id="searchResults" class="search-results">
+      <div class="no-result" id="modalStatus">주소 또는 건물명을 입력 후 검색 버튼을 눌러주세요.</div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // 번역 사전 데이터
   const translations = {
     ko: {
       title: "정보 입력하기",
@@ -89,11 +114,17 @@
       lblStage2: "2단계 (선택) :",
       stage2Place: "음식명 입력 및 브랜드 직접 입력",
       lblAddress: "주소 :",
-      searchPlace: "Search address (주소 검색)",
-      postPlace: "Zipcode (우편번호)",
-      addrPlace: "Basic Address (기본 주소)",
-      detailPlace: "Detailed Address (상세 주소 입력)",
-      btnSubmit: "제출하기"
+      btnSearch: "주소 검색",
+      postPlace: "우편번호",
+      addrPlace: "기본 주소",
+      detailPlace: "상세 주소를 입력해주세요",
+      btnSubmit: "제출하기",
+      modalTitle: "구글 주소 검색",
+      modalPlace: "호텔 이름 또는 주소 입력 (영문/중문 가능)",
+      modalBtn: "검색",
+      modalStatus: "주소 또는 건물명을 입력 후 검색 버튼을 눌러주세요.",
+      searching: "검색 중...",
+      noResults: "검색 결과가 없습니다. 다시 입력해 주세요."
     },
     en: {
       title: "Information Form",
@@ -103,11 +134,17 @@
       lblStage2: "Step 2 (Optional) :",
       stage2Place: "Enter food name & direct brand input",
       lblAddress: "Address :",
-      searchPlace: "Search address",
+      btnSearch: "Search Address",
       postPlace: "Zipcode",
       addrPlace: "Basic Address",
       detailPlace: "Please enter detailed address",
-      btnSubmit: "Submit"
+      btnSubmit: "Submit",
+      modalTitle: "Google Address Search",
+      modalPlace: "Enter Hotel name or Address",
+      modalBtn: "Search",
+      modalStatus: "Enter address or building name and press Search.",
+      searching: "Searching...",
+      noResults: "No results found. Please try again."
     },
     zh: {
       title: "信息输入",
@@ -117,67 +154,128 @@
       lblStage2: "第二步（选填）:",
       stage2Place: "输入食品名称及直接输入品牌",
       lblAddress: "地址 :",
-      searchPlace: "搜索地址",
+      btnSearch: "搜索地址",
       postPlace: "邮政编码",
       addrPlace: "基本地址",
       detailPlace: "请输入详细地址",
-      btnSubmit: "提交"
+      btnSubmit: "提交",
+      modalTitle: "谷歌地址搜索",
+      modalPlace: "输入酒店名称或地址",
+      modalBtn: "搜索",
+      modalStatus: "输入地址或建筑物名称并按搜索。",
+      searching: "正在搜索...",
+      noResults: "未找到结果。请再试一次。"
     }
   };
 
+  let currentLang = "ko";
+  let placesService;
+
   function changeLanguage() {
-    const lang = document.getElementById("langSelect").value;
-    const t = translations[lang];
+    currentLang = document.getElementById("langSelect").value;
+    const t = translations[currentLang];
 
     document.getElementById("pageTitle").innerText = t.title;
     document.getElementById("lblId").innerText = t.lblId;
     document.getElementById("userId").placeholder = t.idPlace;
-
     document.getElementById("lblStage1").innerText = t.lblStage1;
     document.getElementById("lblStage2").innerText = t.lblStage2;
     document.getElementById("foodName").placeholder = t.stage2Place;
-
     document.getElementById("lblAddress").innerText = t.lblAddress;
-
-    document.getElementById("autocomplete-input").placeholder = t.searchPlace;
+    document.getElementById("btnSearch").value = t.btnSearch;
     document.getElementById("postcode").placeholder = t.postPlace;
     document.getElementById("address").placeholder = t.addrPlace;
     document.getElementById("detailAddress").placeholder = t.detailPlace;
     document.getElementById("btnSubmit").innerText = t.btnSubmit;
+
+    // 모달창 내 언어 번역
+    document.getElementById("modalTitle").innerText = t.modalTitle;
+    document.getElementById("searchQuery").placeholder = t.modalPlace;
+    document.getElementById("btnModalSearch").value = t.modalBtn;
+    document.getElementById("modalStatus").innerText = t.modalStatus;
   }
 
-  // 🌟 구글 실시간 추천 검색 엔진 초기화 함수
-  let autocomplete;
-  function initAutocomplete() {
-    const input = document.getElementById('autocomplete-input');
+  // 🌟 구글 맵스 주소 검색 엔진(TextSearch) 로드
+  function initMapService() {
+    // 백그라운드에 구글 Places Service를 세팅해 둡니다
+    const dummyDiv = document.createElement('div');
+    placesService = new google.maps.places.PlacesService(dummyDiv);
+  }
 
-    // 주소 입력칸에 구글 Maps 자동완성 기능 주입
-    autocomplete = new google.maps.places.Autocomplete(input, {
-      fields: ["address_components", "formatted_address"],
-      types: ["address"]
-    });
+  // 팝업 열기
+  function openAddressSearch() {
+    document.getElementById("searchModal").style.display = "block";
+    document.getElementById("searchQuery").focus();
+  }
 
-    // 사용자가 드롭다운 목록에서 추천 주소를 클릭했을 때 실행
-    autocomplete.addListener('place_changed', function() {
-      const place = autocomplete.getPlace();
-      if (!place.address_components) {
-        return;
+  // 팝업 닫기
+  function closeAddressSearch() {
+    document.getElementById("searchModal").style.display = "none";
+    // 팝업 닫힐 때 검색 기록 초기화
+    document.getElementById("searchQuery").value = "";
+    document.getElementById("searchResults").innerHTML = `<div class="no-result" id="modalStatus">${translations[currentLang].modalStatus}</div>`;
+  }
+
+  // 🌟 핵심: 사용자가 입력한 검색어로 구글에서 결과 찾아오기
+  function searchGooglePlaces() {
+    const query = document.getElementById("searchQuery").value;
+    if (!query.trim()) return;
+
+    const resultsContainer = document.getElementById("searchResults");
+    resultsContainer.innerHTML = `<div class="no-result">${translations[currentLang].searching}</div>`;
+
+    // 한국 호텔이나 목적지가 중심이 되도록 타겟팅 반경 세팅 (대한민국 위도/경도)
+    const request = {
+      query: query,
+      fields: ['name', 'formatted_address', 'address_components'],
+      locationBias: { lat: 35.907757, lng: 127.766922 } // 한국 주소 가중치 부여
+    };
+
+    placesService.textSearch(request, function(results, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+        resultsContainer.innerHTML = ""; // 기존 결과 삭제
+
+        // 찾은 주소 목록들 화면에 뿌리기
+        results.forEach(place => {
+          const item = document.createElement("div");
+          item.className = "result-item";
+
+          // 장소 이름(호텔명) + 상세 주소 매칭
+          item.innerHTML = `<strong>${place.name}</strong><br><span style="color:#666; font-size:12px;">${place.formatted_address}</span>`;
+
+          // 사용자가 검색 결과 중 하나를 콕 찍었을 때의 이벤트
+          item.onclick = function() {
+            selectAddress(place);
+          };
+          resultsContainer.appendChild(item);
+        });
+      } else {
+        resultsContainer.innerHTML = `<div class="no-result">${translations[currentLang].noResults}</div>`;
       }
+    });
+  }
 
-      let postcode = "";
-      // 주소 구성요소들을 돌면서 우편번호(postal_code) 찾아내기
+  // 🌟 최종 선택된 주소 정보 폼 입력칸에 파싱해 넣기
+  function selectAddress(place) {
+    let postcode = "";
+
+    // 우편번호 찾아서 획득하기
+    if (place.address_components) {
       for (const component of place.address_components) {
         if (component.types.includes("postal_code")) {
           postcode = component.long_name;
           break;
         }
       }
+    }
 
-      // 화면 각 입력칸에 결과 배정
-      document.getElementById('address').value = place.formatted_address;
-      document.getElementById('postcode').value = postcode;
-      document.getElementById('detailAddress').focus(); // 입력을 돕기 위해 상세주소창으로 포커스 이동
-    });
+    // 인풋창에 값 주입
+    document.getElementById("address").value = place.formatted_address;
+    document.getElementById("postcode").value = postcode ? postcode : "N/A"; // 우편번호 없는 경우 대비
+
+    // 팝업창을 닫고 상세주소창으로 커서 이동
+    closeAddressSearch();
+    document.getElementById("detailAddress").focus();
   }
 
   window.onload = function() {
