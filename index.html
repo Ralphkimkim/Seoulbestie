@@ -9,20 +9,36 @@
     .input-group { margin-bottom: 20px; }
     label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
     input[type="text"], select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
-    input[type="button"], button { padding: 10px 15px; background-color: #007BFF ￼; color: white; border: none; border-radius: 5px; cursor: pointer; }
+
+    /* 🌟 버튼 색상을 눈에 띄는 파란색으로 강제 고정 (!important) */
+    input[type="button"], button {
+      padding: 10px 15px;
+      background-color: #007BFF ￼ !important;
+      color: white !important;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    /* 마우스를 올렸을 때 살짝 진한 파란색으로 변하는 효과 */
+    input[type="button"]:hover, button:hover {
+      background-color: #0056B3 ￼ !important;
+    }
+
     .lang-selector { text-align: right; margin-bottom: 20px; }
     .readonly-input { background-color: #eee; }
 
-    /* 🌟 주소 검색 모달 팝업 레이아웃 및 스타일 보완 */
+    /* 주소 검색 모달 팝업 레이아웃 및 스타일 */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
     .modal-content { background-color: #fff; margin: 15% auto; padding: 25px; border-radius: 10px; max-width: 450px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
     .close-btn:hover { color: #000; }
 
-    /* 모달 내부 입력창 및 버튼 디자인 통일 */
+    /* 모달 내부 입력창 및 버튼 디자인 */
     .modal-content input[type="text"] { width: 75%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 0; }
-    .modal-content input[type="button"] { width: 22%; padding: 10px; background-color: #007BFF ￼; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .modal-content input[type="button"]:hover { background-color: #0056B3 ￼; }
+    .modal-content input[type="button"] { width: 22%; padding: 10px; background-color: #007BFF ￼ !important; color: white !important; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .modal-content input[type="button"]:hover { background-color: #0056B3 ￼ !important; }
 
     .search-results { max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; }
     .result-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; text-align: left; }
@@ -197,7 +213,7 @@
     document.getElementById("btnModalSearch").value = t.modalBtn;
     document.getElementById("modalStatus").innerText = t.modalStatus;
   }
-  // 🌟 구글 API 로드 확인 및 초기화
+
   function initMapService() {
     try {
       const dummyDiv = document.createElement('div');
@@ -206,8 +222,6 @@
       console.error("구글 맵 서비스 초기화 실패:", e);
     }
   }
-
-  // API 키 자체가 만료되었거나 결제 등록 오류 시 자동으로 경고창을 띄워주는 이벤트 감지
   window.gm_authFailure = function() {
     alert("구글 지도 API 인증 실패! 다음을 확인해 주세요:\n1. 구글 클라우드에 해외 결제 카드가 등록되었는지\n2. API 키를 코드 상단에 올바르게 입력했는지");
   };
@@ -223,14 +237,12 @@
     document.getElementById("searchResults").innerHTML = `<div class="no-result" id="modalStatus">${translations[currentLang].modalStatus}</div>`;
   }
 
-  // 🌟 검색 실행 함수 (에러 트래킹 기능 보완)
   function searchGooglePlaces() {
     const query = document.getElementById("searchQuery").value;
     const resultsContainer = document.getElementById("searchResults");
 
     if (!query.trim()) return;
 
-    // 1. 구글 서비스 로드 여부 검사
     if (typeof google === 'undefined' || !placesService) {
       resultsContainer.innerHTML = `
         <div class="no-result error-text">
@@ -242,16 +254,13 @@
 
     resultsContainer.innerHTML = `<div class="no-result">${translations[currentLang].searching}</div>`;
 
-    // 2. 한국 주소를 정교하게 타겟팅하기 위해 위경도 검색 필터 표준화
     const request = {
       query: query,
-      location: new google.maps.LatLng(37.5665, 126.9780), // 서울 중심 좌표
-      radius: 50000 // 반경 50km
+      location: new google.maps.LatLng(37.5665, 126.9780),
+      radius: 50000
     };
 
-    // 3. 구글 검색 요청 실행
     placesService.textSearch(request, function(results, status) {
-      // 성공했을 때 목록 그리기
       if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
         resultsContainer.innerHTML = "";
 
@@ -266,7 +275,6 @@
           resultsContainer.appendChild(item);
         });
       } else {
-        // 🌟 에러 발생 시 단순 '검색 중'에 멈추지 않고, 구글이 뱉은 에러 코드를 화면에 직접 뿌려줍니다.
         let errorMsg = translations[currentLang].noResults;
         if (status === "REQUEST_DENIED") {
           errorMsg = `
