@@ -217,6 +217,7 @@
   function initMapService() {
     try {
       const dummyDiv = document.createElement('div');
+      document.body.appendChild(dummyDiv);
       placesService = new google.maps.places.PlacesService(dummyDiv);
     } catch (e) {
       console.error("구글 맵 서비스 초기화 실패:", e);
