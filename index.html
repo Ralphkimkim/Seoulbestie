@@ -1,167 +1,124 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>업그레이드된 입력 페이지</title>
-  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #F9F9F9 ￼; }
-    .container { background-color: white; padding: 30px; border-radius: 10px; max-width: 500px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .input-group { margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
-    input[type="text"], select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-    input[type="button"], button { padding: 10px 15px; background-color: #007BFF ￼; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    .lang-selector { text-align: right; margin-bottom: 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>업그레이드된 입력 페이지 (구글 맵스)</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #F9F9F9 ￼; }
+        .container { background-color: white; padding: 30px; border-radius: 10px; max-width: 500px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 20px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
+        input[type="text"], select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; background-color: #007BFF ￼; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .lang-selector { text-align: right; margin-bottom: 20px; }
+    </style>
+
+    <script async src="maps.googleapis.com/maps/api/js?libraries=places&callback=initAutocomplete&…"></script>
 </head>
 <body>
 
 <div class="container">
-  <div class="lang-selector">
-    <select id="langSelect" onchange="changeLanguage()" style="width: 120px;">
-      <option value="ko">한국어</option>
-      <option value="en">English</option>
-      <option value="zh">中文</option>
-    </select>
-  </div>
-
-  <h2 id="pageTitle">정보 입력하기</h2>
-
-  <form id="myForm" onsubmit="alert('제출 완료되었습니다!'); return false;">
-
-    <div class="input-group">
-      <label id="lblId">ID :</label>
-      <input type="text" id="userId" name="userId" placeholder="请输入小红书ID" required>
+    <div class="lang-selector">
+        <select id="langSelect" onchange="changeLanguage()" style="width: 120px;">
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+        </select>
     </div>
 
-    <div class="input-group">
-      <label id="lblStage1">1단계 (필수) :</label>
-      <select id="category" name="category" required>
-        <option value="">선택하세요 / Select / 请选择</option>
-        <option value="chicken">Chicken / 炸鸡 (치킨)</option>
-        <option value="pizza">Pizza / 比萨 (피자)</option>
-        <option value="korean">Korean Food / 韩餐 (한식)</option>
-        <option value="tteokbokki">Tteokbokki / 炒年糕 (떡볶이)</option>
-        <option value="snack">Snack Food / 小吃 (분식)</option>
-        <option value="coffee">Coffee / 咖啡 (커피)</option>
-        <option value="burger">Hamburger / 汉堡 (햄버거)</option>
-        <option value="asian">Asian Food / 亚洲菜 (아시안)</option>
-      </select>
-    </div>
+    <h2 id="pageTitle">정보 입력하기</h2>
 
-    <div class="input-group">
-      <label id="lblStage2">2단계 (선택) :</label>
-      <input type="text" list="foodList" id="foodName" name="foodName" placeholder="음식명 입력 및 브랜드 직접 입력">
-      <datalist id="foodList">
-        <option value="KFC">
-        <option value="McDonald's">
-        <option value="엽기떡볶이">
-        <option value="교촌치킨">
-      </datalist>
-    </div>
+    <form id="myForm" onsubmit="alert('제출 완료되었습니다!'); return false;">
+        <div class="input-group">
+            <label id="lblId">ID :</label>
+            <input type="text" id="userId" name="userId" placeholder="请输入小红书ID" required>
+        </div>
 
-    <div class="input-group">
-      <label id="lblAddress">주소 :</label>
-      <div style="display: flex; gap: 5px; margin-bottom: 5px;">
-        <input type="text" id="postcode" name="postcode" placeholder="우편번호" readonly style="flex: 1;">
-        <input type="button" id="btnSearch" onclick="searchAddress()" value="우편번호 찾기">
-      </div>
-      <input type="text" id="address" name="address" placeholder="기본 주소" readonly style="margin-bottom: 5px;">
-      <input type="text" id="detailAddress" name="detailAddress" placeholder="상세 주소를 입력해주세요">
-    </div>
+        <div class="input-group">
+            <label id="lblStage1">1단계 (필수) :</label>
+            <select id="category" name="category" required>
+                <option value="">선택하세요 / Select / 请选择</option>
+                <option value="chicken">Chicken / 炸鸡 (치킨)</option>
+                <option value="pizza">Pizza / 比萨 (피자)</option>
+                <option value="asian">Asian Food / 亚洲菜 (아시안)</option>
+            </select>
+        </div>
 
-    <button type="submit" id="btnSubmit" style="width: 100%; font-size: 16px;">제출하기</button>
-  </form>
+        <div class="input-group">
+            <label id="lblStage2">2단계 (선택) :</label>
+            <input type="text" list="foodList" id="foodName" name="foodName" placeholder="음식명 입력 및 브랜드 직접 입력">
+            <datalist id="foodList">
+                <option value="KFC"><option value="McDonald's"><option value="엽기떡볶이">
+            </datalist>
+        </div>
+
+        <div class="input-group">
+            <label id="lblAddress">주소 :</label>
+            <input type="text" id="autocomplete-input" placeholder="Search address (주소 검색)" style="margin-bottom: 5px; border-color: #007BFF ￼; border-width: 2px;">
+
+            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                <input type="text" id="postcode" name="postcode" placeholder="Zipcode (우편번호)" readonly style="flex: 1; background-color: #eee;">
+            </div>
+            <input type="text" id="address" name="address" placeholder="Basic Address (기본 주소)" readonly style="margin-bottom: 5px; background-color: #eee;">
+            <input type="text" id="detailAddress" name="detailAddress" placeholder="Detailed Address (상세 주소 입력)">
+        </div>
+
+        <button type="submit" id="btnSubmit" style="width: 100%; font-size: 16px;">제출하기</button>
+    </form>
 </div>
 
 <script>
-  const translations = {
-    ko: {
-      title: "정보 입력하기",
-      lblId: "ID :",
-      idPlace: "请输入小红书ID (샤오홍슈 아이디 입력)",
-      lblStage1: "1단계 (필수) :",
-      lblStage2: "2단계 (선택) :",
-      stage2Place: "음식명 입력 및 브랜드 직접 입력",
-      lblAddress: "주소 :",
-      btnSearch: "우편번호 찾기",
-      postPlace: "우편번호",
-      addrPlace: "기본 주소",
-      detailPlace: "상세 주소를 입력해주세요",
-      btnSubmit: "제출하기",
-      apiLang: "ko"
-    },
-    en: {
-      title: "Information Form",
-      lblId: "ID :",
-      idPlace: "Please enter your Xiaohongshu ID",
-      lblStage1: "Step 1 (Required) :",
-      lblStage2: "Step 2 (Optional) :",
-      stage2Place: "Enter food name & direct brand input",
-      lblAddress: "Address :",
-      btnSearch: "Find Zipcode",
-      postPlace: "Zipcode",
-      addrPlace: "Basic Address",
-      detailPlace: "Please enter detailed address",
-      btnSubmit: "Submit",
-      apiLang: "en"
-    },
-    zh: {
-      title: "信息输入",
-      lblId: "ID :",
-      idPlace: "请输入小红书ID",
-      lblStage1: "第一步（必填）:",
-      lblStage2: "第二步（选填）:",
-      stage2Place: "输入食品名称及直接输入品牌",
-      lblAddress: "地址 :",
-      btnSearch: "查找邮政编码",
-      postPlace: "邮政编码",
-      addrPlace: "基本地址",
-      detailPlace: "请输入详细地址",
-      btnSubmit: "提交",
-      apiLang: "en"
+    // 언어 변경 기능 (이전과 동일)
+    const translations = {
+        ko: { title: "정보 입력하기", lblId: "ID :", lblStage1: "1단계 (필수) :", lblStage2: "2단계 (선택) :", lblAddress: "주소 :", btnSubmit: "제출하기" },
+        en: { title: "Information Form", lblId: "ID :", lblStage1: "Step 1 (Required) :", lblStage2: "Step 2 (Optional) :", lblAddress: "Address :", btnSubmit: "Submit" },
+        zh: { title: "信息输入", lblId: "ID :", lblStage1: "第一步（必填）:", lblStage2: "第二步（选填）:", lblAddress: "地址 :", btnSubmit: "提交" }
+    };
+
+    function changeLanguage() {
+        const lang = document.getElementById("langSelect").value;
+        const t = translations[lang];
+        document.getElementById("pageTitle").innerText = t.title;
+        document.getElementById("lblId").innerText = t.lblId;
+        document.getElementById("lblStage1").innerText = t.lblStage1;
+        document.getElementById("lblStage2").innerText = t.lblStage2;
+        document.getElementById("lblAddress").innerText = t.lblAddress;
+        document.getElementById("btnSubmit").innerText = t.btnSubmit;
     }
-  };
 
-  let currentApiLang = "ko";
+    // 🌟 구글 주소 자동완성 기능 활성화
+    let autocomplete;
+    function initAutocomplete() {
+        // 검색창 지정
+        const input = document.getElementById('autocomplete-input');
+        // Places API 자동완성 연결
+        autocomplete = new google.maps.places.Autocomplete(input, {
+            fields: ["address_components", "formatted_address"],
+            types: ["address"]
+        });
 
-  function changeLanguage() {
-    const lang = document.getElementById("langSelect").value;
-    const t = translations[lang];
+        // 사용자가 주소를 선택했을 때 실행되는 함수
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (!place.address_components) return;
 
-    document.getElementById("pageTitle").innerText = t.title;
-    document.getElementById("lblId").innerText = t.lblId;
-    document.getElementById("userId").placeholder = t.idPlace;
+            let postcode = "";
+            // 우편번호 찾기
+            for (const component of place.address_components) {
+                if (component.types.includes("postal_code")) {
+                    postcode = component.long_name;
+                    break;
+                }
+            }
 
-    document.getElementById("lblStage1").innerText = t.lblStage1;
-    document.getElementById("lblStage2").innerText = t.lblStage2;
-    document.getElementById("foodName").placeholder = t.stage2Place;
+            // 결과값 넣기
+            document.getElementById('address').value = place.formatted_address; // 기본 주소
+            document.getElementById('postcode').value = postcode;               // 우편번호
+            document.getElementById('detailAddress').focus();                   // 상세주소로 커서 이동
+        });
+    }
 
-    document.getElementById("lblAddress").innerText = t.lblAddress;
-    document.getElementById("btnSearch").value = t.btnSearch;
-    document.getElementById("postcode").placeholder = t.postPlace;
-    document.getElementById("address").placeholder = t.addrPlace;
-    document.getElementById("detailAddress").placeholder = t.detailPlace;
-    document.getElementById("btnSubmit").innerText = t.btnSubmit;
-
-    currentApiLang = t.apiLang;
-  }
-
-  function searchAddress() {
-    new daum.Postcode({
-      language: currentApiLang,
-      oncomplete: function(data) {
-        document.getElementById('postcode').value = data.zonecode;
-        let addr = currentApiLang === 'en' ? data.addressEnglish : data.address;
-        document.getElementById('address').value = addr;
-        document.getElementById("detailAddress").focus();
-      }
-    }).open();
-  }
-
-  window.onload = function() {
-    changeLanguage();
-  };
+    window.onload = function() { changeLanguage(); };
 </script>
 
 </body>
