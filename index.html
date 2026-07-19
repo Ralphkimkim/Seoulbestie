@@ -226,7 +226,17 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ6ok_TDzKlb6TTEiqpWuZY50
 
     <div class="input-group">
       <label>ID</label>
-      <input type="text" id="userId" placeholder="샤오홍슈 ID 입력" required />
+     <label for="userId">Red Note ID</label>
+
+<input
+    type="text"
+    id="userId"
+    placeholder="Red Note ID 입력"
+    inputmode="numeric"
+    pattern="[0-9]*"
+    maxlength="20"
+    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+    required>
     </div>
 
     <div class="input-group">
