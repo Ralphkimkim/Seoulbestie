@@ -6,267 +6,103 @@
   <title>주소 입력 페이지</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 16px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f4f6f8;
-      color: #222;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 640px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-
-    h2 {
-      margin-top: 0;
-      font-size: 26px;
-      text-align: center;
-    }
-
-    .input-group {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 8px;
-      font-size: 15px;
-    }
-
-    input[type="text"],
-    select {
-      width: 100%;
-      height: 52px;
-      padding: 0 14px;
-      border: 1px solid #d0d7de;
-      border-radius: 12px;
-      font-size: 16px;
-      background: #fff;
-    }
-
-    .readonly {
-      background: #f1f3f5;
-    }
-
-    button,
-    input[type="button"] {
-      height: 52px;
-      border: none;
-      border-radius: 12px;
-      background: #007bff;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    button:hover,
-    input[type="button"]:hover {
-      background: #005fd1;
-    }
-
-    .address-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .address-row input[type="text"] {
-      flex: 1;
-    }
-
-    .address-row input[type="button"] {
-      width: 120px;
-      flex-shrink: 0;
-    }
-
-    #submitBtn {
-      width: 100%;
-      margin-top: 8px;
-      font-size: 17px;
-    }
-
-    /* 모달 */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 9999;
-      padding: 16px;
-    }
-
-    .modal-content {
-      background: #fff;
-      border-radius: 18px;
-      padding: 20px;
-      width: 100%;
-      max-width: 640px;
-      margin: 60px auto 0;
-      position: relative;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 14px;
-      right: 16px;
-      font-size: 28px;
-      cursor: pointer;
-      color: #666;
-    }
-
-    .search-box {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .search-box input[type="text"] {
-      flex: 1;
-    }
-
-    .search-box input[type="button"] {
-      width: 90px;
-      flex-shrink: 0;
-    }
-
-    .results {
-      margin-top: 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      overflow: hidden;
-      max-height: 320px;
-      overflow-y: auto;
-    }
-
-    .result-item {
-      padding: 14px;
-      border-bottom: 1px solid #f0f0f0;
-      cursor: pointer;
-    }
-
-    .result-item:hover {
-      background: #f8fafc;
-    }
-
-    .result-item:last-child {
-      border-bottom: none;
-    }
-
-    .status {
-      padding: 18px;
-      text-align: center;
-      color: #666;
-    }
-
-    .error {
-      color: #dc3545;
-      font-weight: 700;
-    }
-
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Noto Sans SC", sans-serif; background: #f4f6f8; color: #222; }
+    .container { width: 100%; max-width: 640px; margin: 0 auto; background: #fff; border-radius: 18px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .language-row { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+    .language-row select { width: 150px; height: 44px; }
+    h2 { margin-top: 0; font-size: 26px; text-align: center; }
+    .input-group { margin-bottom: 18px; }
+    label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 15px; }
+    .required { color: #dc3545; }
+    .helper-text { margin: 7px 2px 0; color: #6b7280; font-size: 12px; line-height: 1.45; }
+    input[type="text"], select { width: 100%; height: 52px; padding: 0 14px; border: 1px solid #d0d7de; border-radius: 12px; font-size: 16px; background: #fff; outline: none; }
+    input[type="text"]:focus, select:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.13); }
+    .readonly { background: #f1f3f5 !important; }
+    button, input[type="button"] { height: 52px; border: none; border-radius: 12px; background: #007bff; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+    button:hover, input[type="button"]:hover { background: #005fd1; }
+    .address-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .address-row input[type="text"] { flex: 1; }
+    .address-row input[type="button"] { width: 120px; flex-shrink: 0; }
+    #submitBtn { width: 100%; margin-top: 8px; font-size: 17px; }
+    .payment-notice { padding: 13px 14px; margin: -2px 0 18px; border-radius: 12px; background: #eef6ff; border: 1px solid #cfe2ff; color: #174a7e; font-size: 13px; line-height: 1.5; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 9999; padding: 16px; }
+    .modal-content { background: #fff; border-radius: 18px; padding: 20px; width: 100%; max-width: 640px; margin: 60px auto 0; position: relative; }
+    .close-btn { position: absolute; top: 14px; right: 16px; font-size: 28px; cursor: pointer; color: #666; }
+    .search-box { display: flex; gap: 8px; margin-top: 16px; }
+    .search-box input[type="text"] { flex: 1; }
+    .search-box input[type="button"] { width: 90px; flex-shrink: 0; }
+    .results { margin-top: 16px; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; max-height: 320px; overflow-y: auto; }
+    .result-item { padding: 14px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+    .result-item:hover { background: #f8fafc; }
+    .result-item:last-child { border-bottom: none; }
+    .status { padding: 18px; text-align: center; color: #666; line-height: 1.55; }
+    .error { color: #dc3545; font-weight: 700; }
     @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-
-      .container {
-        padding: 18px;
-        border-radius: 16px;
-      }
-
-      h2 {
-        font-size: 22px;
-      }
-
-      .address-row {
-        flex-direction: column;
-      }
-
-      .address-row input[type="button"] {
-        width: 100%;
-      }
-
-      .search-box {
-        flex-direction: column;
-      }
-
-      .search-box input[type="button"] {
-        width: 100%;
-      }
-
-      .modal-content {
-        margin-top: 20px;
-      }
+      body { padding: 10px; }
+      .container { padding: 18px; border-radius: 16px; }
+      h2 { font-size: 22px; }
+      .address-row, .search-box { flex-direction: column; }
+      .address-row input[type="button"], .search-box input[type="button"] { width: 100%; }
+      .modal-content { margin-top: 20px; }
     }
   </style>
 
-  <!-- ★ 여기 API 키만 교체 -->
-<script async defer
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ6ok_TDzKlb6TTEiqpWuZY50ybfv7PEw&libraries=places&callback=initMapService">
-</script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ6ok_TDzKlb6TTEiqpWuZY50ybfv7PEw&libraries=places&callback=initMapService"></script>
 </head>
 <body>
 
 <div class="container">
-  <h2>정보 입력하기</h2>
+  <div class="language-row">
+    <select id="languageSelect" onchange="changeLanguage(this.value)">
+      <option value="ko">한국어</option>
+      <option value="en">English</option>
+      <option value="zh">中文</option>
+    </select>
+  </div>
+
+  <h2 id="pageTitle">정보 입력하기</h2>
 
   <form onsubmit="submitForm(event)">
-
     <div class="input-group">
-      <label>ID</label>
-     <label for="userId">Red Note ID</label>
-
-<input
-    type="text"
-    id="userId"
-    placeholder="Red Note ID 입력"
-    inputmode="numeric"
-    pattern="[0-9]*"
-    maxlength="20"
-    oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-    required>
+      <label for="userId" id="userIdLabel">Red Note ID <span class="required">*</span></label>
+      <input type="text" id="userId" placeholder="Red Note ID 입력" inputmode="numeric" pattern="[0-9]*" maxlength="20" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required />
+      <div class="helper-text" id="userIdHelper">숫자만 입력할 수 있습니다.</div>
     </div>
 
     <div class="input-group">
-      <label>카테고리</label>
+      <label for="payerName" id="payerNameLabel">입금자명 <span class="required">*</span></label>
+      <input type="text" id="payerName" placeholder="WeChat 또는 Alipay 입금자명 입력" maxlength="40" autocomplete="name" required />
+      <div class="helper-text" id="payerNameHelper">실제 송금할 때 표시되는 이름과 동일하게 입력해 주세요.</div>
+    </div>
+
+    <div class="payment-notice" id="paymentNotice">QR코드를 받은 후 WeChat Pay 또는 Alipay로 송금해 주세요.</div>
+
+    <div class="input-group">
+      <label for="category" id="categoryLabel">카테고리 <span class="required">*</span></label>
       <select id="category" required>
-        <option value="">선택하세요</option>
-        <option>치킨</option>
-        <option>피자</option>
-        <option>한식</option>
-        <option>떡볶이</option>
-        <option>커피</option>
-        <option>햄버거</option>
+        <option value="" id="categoryDefault">선택하세요</option>
+        <option value="chicken" data-ko="치킨" data-en="Chicken" data-zh="炸鸡">치킨</option>
+        <option value="pizza" data-ko="피자" data-en="Pizza" data-zh="披萨">피자</option>
+        <option value="korean" data-ko="한식" data-en="Korean Food" data-zh="韩餐">한식</option>
+        <option value="tteokbokki" data-ko="떡볶이" data-en="Tteokbokki" data-zh="炒年糕">떡볶이</option>
+        <option value="coffee" data-ko="커피" data-en="Coffee" data-zh="咖啡">커피</option>
+        <option value="burger" data-ko="햄버거" data-en="Hamburger" data-zh="汉堡">햄버거</option>
       </select>
     </div>
 
     <div class="input-group">
-      <label>브랜드 / 음식명</label>
-      <input type="text" id="foodName" placeholder="예: KFC, 엽기떡볶이" />
+      <label for="foodName" id="foodNameLabel">브랜드 / 음식명</label>
+      <input type="text" id="foodName" placeholder="예: KFC, 엽기떡볶이" maxlength="80" />
     </div>
 
     <div class="input-group">
-      <label>주소</label>
-
+      <label id="addressLabel">주소 <span class="required">*</span></label>
       <div class="address-row">
         <input type="text" id="postcode" placeholder="우편번호" readonly class="readonly" />
-        <input type="button" value="주소 검색" onclick="openModal()" />
+        <input type="button" id="addressSearchBtn" value="주소 검색" onclick="openModal()" />
       </div>
-
-      <input type="text" id="address" placeholder="기본 주소" readonly class="readonly" style="margin-bottom:8px;" />
-
+      <input type="text" id="address" placeholder="기본 주소" readonly class="readonly" style="margin-bottom:8px;" required />
       <input type="text" id="detailAddress" placeholder="상세 주소 입력" />
     </div>
 
@@ -274,164 +110,206 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ6ok_TDzKlb6TTEiqpWuZY50
   </form>
 </div>
 
-<!-- 모달 -->
-<div id="modal" class="modal">
+<div id="modal" class="modal" onclick="handleModalBackground(event)">
   <div class="modal-content">
     <span class="close-btn" onclick="closeModal()">&times;</span>
-
-    <h3>주소 검색</h3>
-
+    <h3 id="modalTitle">주소 검색</h3>
     <div class="search-box">
       <input type="text" id="searchQuery" placeholder="건물명 또는 주소 입력" />
-      <input type="button" value="검색" onclick="searchPlace()" />
+      <input type="button" id="searchBtn" value="검색" onclick="searchPlace()" />
     </div>
-
-    <div id="results" class="results">
-      <div class="status">검색어를 입력하세요.</div>
-    </div>
+    <div id="results" class="results"><div class="status">검색어를 입력하세요.</div></div>
   </div>
 </div>
 
 <script>
   let placesService;
+  let currentLanguage = "ko";
 
-  function initMapService() {
-    const map = new google.maps.Map(document.createElement("div"));
-    placesService = new google.maps.places.PlacesService(map);
+  const translations = {
+    ko: {
+      htmlLang: "ko", documentTitle: "주소 입력 페이지", pageTitle: "정보 입력하기",
+      userIdLabel: "Red Note ID", userIdPlaceholder: "Red Note ID 입력", userIdHelper: "숫자만 입력할 수 있습니다.",
+      payerNameLabel: "입금자명", payerNamePlaceholder: "WeChat 또는 Alipay 입금자명 입력", payerNameHelper: "실제 송금할 때 표시되는 이름과 동일하게 입력해 주세요.",
+      paymentNotice: "QR코드를 받은 후 WeChat Pay 또는 Alipay로 송금해 주세요.", categoryLabel: "카테고리", categoryDefault: "선택하세요",
+      foodNameLabel: "브랜드 / 음식명", foodNamePlaceholder: "예: KFC, 엽기떡볶이", addressLabel: "주소", postcodePlaceholder: "우편번호",
+      addressSearchBtn: "주소 검색", addressPlaceholder: "기본 주소", detailAddressPlaceholder: "상세 주소 입력", submitBtn: "제출하기",
+      modalTitle: "주소 검색", searchQueryPlaceholder: "건물명 또는 주소 입력", searchBtn: "검색", initialStatus: "검색어를 입력하세요.",
+      searching: "검색 중...", noResults: "검색 결과가 없습니다.", apiNotReady: "Google Maps API가 아직 준비되지 않았습니다.",
+      placesApiRequired: "Places API (Legacy) 활성화가 필요합니다.", billingRequired: "Google Cloud 결제 계정 연결이 필요합니다.",
+      submitSuccess: "제출 완료!", addressRequired: "주소를 검색해서 선택해 주세요.",
+      apiFailure: "구글 API 인증 실패\n\n1. Maps JavaScript API 활성화\n2. Places API (Legacy) 활성화\n3. 결제 카드 등록 여부 확인"
+    },
+    en: {
+      htmlLang: "en", documentTitle: "Address Entry Page", pageTitle: "Enter Your Information",
+      userIdLabel: "Red Note ID", userIdPlaceholder: "Enter your Red Note ID", userIdHelper: "Numbers only.",
+      payerNameLabel: "Payment Sender Name", payerNamePlaceholder: "Enter the name used for WeChat or Alipay payment", payerNameHelper: "Enter the exact name that will appear on the payment.",
+      paymentNotice: "After receiving the QR code, send payment via WeChat Pay or Alipay.", categoryLabel: "Category", categoryDefault: "Please select",
+      foodNameLabel: "Brand / Food Name", foodNamePlaceholder: "Example: KFC, McDonald's", addressLabel: "Address", postcodePlaceholder: "Postal code",
+      addressSearchBtn: "Search Address", addressPlaceholder: "Main address", detailAddressPlaceholder: "Enter detailed address", submitBtn: "Submit",
+      modalTitle: "Address Search", searchQueryPlaceholder: "Enter a building name or address", searchBtn: "Search", initialStatus: "Enter a search term.",
+      searching: "Searching...", noResults: "No results found.", apiNotReady: "Google Maps API is not ready yet.",
+      placesApiRequired: "Places API (Legacy) must be enabled.", billingRequired: "A Google Cloud billing account must be connected.",
+      submitSuccess: "Submitted successfully!", addressRequired: "Please search for and select an address.",
+      apiFailure: "Google API authentication failed.\n\n1. Enable Maps JavaScript API\n2. Enable Places API (Legacy)\n3. Check billing registration"
+    },
+    zh: {
+      htmlLang: "zh-CN", documentTitle: "地址填写页面", pageTitle: "填写信息",
+      userIdLabel: "Red Note ID", userIdPlaceholder: "请输入 Red Note ID", userIdHelper: "只能输入数字。",
+      payerNameLabel: "付款人姓名", payerNamePlaceholder: "请输入微信或支付宝付款人姓名", payerNameHelper: "请填写与实际付款时显示完全一致的姓名。",
+      paymentNotice: "收到二维码后，请使用微信支付或支付宝付款。", categoryLabel: "类别", categoryDefault: "请选择",
+      foodNameLabel: "品牌 / 食品名称", foodNamePlaceholder: "例如：KFC、麦当劳", addressLabel: "地址", postcodePlaceholder: "邮政编码",
+      addressSearchBtn: "搜索地址", addressPlaceholder: "基本地址", detailAddressPlaceholder: "请输入详细地址", submitBtn: "提交",
+      modalTitle: "地址搜索", searchQueryPlaceholder: "请输入建筑名称或地址", searchBtn: "搜索", initialStatus: "请输入搜索内容。",
+      searching: "正在搜索...", noResults: "没有找到结果。", apiNotReady: "Google Maps API 尚未准备完成。",
+      placesApiRequired: "需要启用 Places API (Legacy)。", billingRequired: "需要连接 Google Cloud 结算账户。",
+      submitSuccess: "提交成功！", addressRequired: "请搜索并选择地址。",
+      apiFailure: "Google API 验证失败。\n\n1. 启用 Maps JavaScript API\n2. 启用 Places API (Legacy)\n3. 检查结算账户"
+    }
+  };
+
+  function t() { return translations[currentLanguage]; }
+  function setRequiredLabel(id, text) { document.getElementById(id).innerHTML = text + ' <span class="required">*</span>'; }
+
+  function changeLanguage(language) {
+    currentLanguage = language;
+    const lang = t();
+    document.documentElement.lang = lang.htmlLang;
+    document.title = lang.documentTitle;
+    document.getElementById("pageTitle").textContent = lang.pageTitle;
+    setRequiredLabel("userIdLabel", lang.userIdLabel);
+    document.getElementById("userId").placeholder = lang.userIdPlaceholder;
+    document.getElementById("userIdHelper").textContent = lang.userIdHelper;
+    setRequiredLabel("payerNameLabel", lang.payerNameLabel);
+    document.getElementById("payerName").placeholder = lang.payerNamePlaceholder;
+    document.getElementById("payerNameHelper").textContent = lang.payerNameHelper;
+    document.getElementById("paymentNotice").textContent = lang.paymentNotice;
+    setRequiredLabel("categoryLabel", lang.categoryLabel);
+    document.getElementById("categoryDefault").textContent = lang.categoryDefault;
+    document.querySelectorAll("#category option[data-ko]").forEach(option => { option.textContent = option.dataset[language]; });
+    document.getElementById("foodNameLabel").textContent = lang.foodNameLabel;
+    document.getElementById("foodName").placeholder = lang.foodNamePlaceholder;
+    setRequiredLabel("addressLabel", lang.addressLabel);
+    document.getElementById("postcode").placeholder = lang.postcodePlaceholder;
+    document.getElementById("addressSearchBtn").value = lang.addressSearchBtn;
+    document.getElementById("address").placeholder = lang.addressPlaceholder;
+    document.getElementById("detailAddress").placeholder = lang.detailAddressPlaceholder;
+    document.getElementById("submitBtn").textContent = lang.submitBtn;
+    document.getElementById("modalTitle").textContent = lang.modalTitle;
+    document.getElementById("searchQuery").placeholder = lang.searchQueryPlaceholder;
+    document.getElementById("searchBtn").value = lang.searchBtn;
+    resetSearchResults();
   }
 
-  window.gm_authFailure = function () {
-    alert(
-      "구글 API 인증 실패\\n\\n" +
-      "1. Maps JavaScript API 활성화\\n" +
-      "2. Places API (Legacy) 활성화\\n" +
-      "3. 결제 카드 등록 여부 확인"
-    );
-  };
+  function initMapService() {
+    try {
+      const map = new google.maps.Map(document.createElement("div"));
+      placesService = new google.maps.places.PlacesService(map);
+    } catch (error) {
+      console.error("Google Maps initialization error:", error);
+    }
+  }
+
+  window.gm_authFailure = function () { alert(t().apiFailure); };
 
   function openModal() {
     document.getElementById("modal").style.display = "block";
-    document.getElementById("searchQuery").focus();
+    setTimeout(() => document.getElementById("searchQuery").focus(), 50);
   }
 
   function closeModal() {
     document.getElementById("modal").style.display = "none";
     document.getElementById("searchQuery").value = "";
-    document.getElementById("results").innerHTML =
-      '<div class="status">검색어를 입력하세요.</div>';
+    resetSearchResults();
   }
 
-  async function searchPlace() {
+  function handleModalBackground(event) { if (event.target.id === "modal") closeModal(); }
+
+  function resetSearchResults() {
+    document.getElementById("results").innerHTML = '<div class="status">' + escapeHtml(t().initialStatus) + '</div>';
+  }
+
+  function searchPlace() {
     const query = document.getElementById("searchQuery").value.trim();
     const resultsBox = document.getElementById("results");
-
-    if (!query) return;
-
-    resultsBox.innerHTML = '<div class="status">검색 중...</div>';
-
-    const request = {
-      query: query,
-      location: new google.maps.LatLng(37.5665, 126.9780),
-      radius: 50000
-    };
-
+    if (!query) { resetSearchResults(); return; }
+    if (typeof google === "undefined" || !google.maps || !google.maps.places || !placesService) {
+      resultsBox.innerHTML = '<div class="status error">' + escapeHtml(t().apiNotReady) + '</div>';
+      return;
+    }
+    resultsBox.innerHTML = '<div class="status">' + escapeHtml(t().searching) + '</div>';
+    const request = { query: query, location: new google.maps.LatLng(37.5665,126.9780), radius: 50000 };
     placesService.textSearch(request, function(results, status) {
-
-      if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
-
+      if (status === google.maps.places.PlacesServiceStatus.OK && Array.isArray(results) && results.length) {
         resultsBox.innerHTML = "";
-
         results.forEach(place => {
-
           const div = document.createElement("div");
           div.className = "result-item";
-
-          div.innerHTML = `
-            <strong>${place.name}</strong><br>
-            <small>${place.formatted_address}</small>
-          `;
-
+          div.innerHTML = "<strong>" + escapeHtml(place.name || "") + "</strong><br><small>" + escapeHtml(place.formatted_address || "") + "</small>";
           div.onclick = () => selectPlace(place);
-
           resultsBox.appendChild(div);
         });
-
-      } else {
-
-        let msg = "검색 결과가 없습니다.";
-
-        if (status === "REQUEST_DENIED") {
-          msg = '<span class="error">Places API (Legacy) 활성화 필요</span>';
-        }
-
-        if (status === "OVER_QUERY_LIMIT") {
-          msg = '<span class="error">결제 카드 등록 필요</span>';
-        }
-
-        resultsBox.innerHTML = `<div class="status">${msg}</div>`;
+        return;
       }
+      let message = t().noResults;
+      if (status === google.maps.places.PlacesServiceStatus.REQUEST_DENIED) message = t().placesApiRequired;
+      else if (status === google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) message = t().billingRequired;
+      resultsBox.innerHTML = '<div class="status error">' + escapeHtml(message) + '</div>';
     });
   }
 
   function selectPlace(place) {
-
-    placesService.getDetails(
-      {
-        placeId: place.place_id,
-        fields: ["address_components", "formatted_address"]
-      },
-      function(detail, status) {
-
-        let postcode = "";
-
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-
-          detail.address_components.forEach(c => {
-            if (c.types.includes("postal_code")) {
-              postcode = c.long_name;
-            }
+    placesService.getDetails({ placeId: place.place_id, fields: ["address_components", "formatted_address"] }, function(detail, status) {
+      let postcode = "";
+      let selectedAddress = place.formatted_address || "";
+      if (status === google.maps.places.PlacesServiceStatus.OK && detail) {
+        selectedAddress = detail.formatted_address || selectedAddress;
+        if (Array.isArray(detail.address_components)) {
+          detail.address_components.forEach(component => {
+            if (component.types.includes("postal_code")) postcode = component.long_name;
           });
-
-          document.getElementById("address").value =
-            detail.formatted_address;
-
-        } else {
-
-          document.getElementById("address").value =
-            place.formatted_address;
         }
-
-        document.getElementById("postcode").value = postcode || "N/A";
-
-        closeModal();
-        document.getElementById("detailAddress").focus();
       }
-    );
+      document.getElementById("address").value = selectedAddress;
+      document.getElementById("postcode").value = postcode || "N/A";
+      closeModal();
+      document.getElementById("detailAddress").focus();
+    });
   }
 
-  function submitForm(e) {
-    e.preventDefault();
-
-    const data = {
-      userId: document.getElementById("userId").value,
-      category: document.getElementById("category").value,
-      foodName: document.getElementById("foodName").value,
-      postcode: document.getElementById("postcode").value,
-      address: document.getElementById("address").value,
-      detailAddress: document.getElementById("detailAddress").value
-    };
-
-    console.log(data);
-
-    alert("제출 완료!");
-  }
-
-  document.getElementById("searchQuery").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      searchPlace();
+  function submitForm(event) {
+    event.preventDefault();
+    const form = event.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    if (!document.getElementById("address").value.trim()) {
+      alert(t().addressRequired);
+      openModal();
+      return;
     }
+    const data = {
+      language: currentLanguage,
+      userId: document.getElementById("userId").value.trim(),
+      payerName: document.getElementById("payerName").value.trim(),
+      category: document.getElementById("category").value,
+      categoryText: document.getElementById("category").selectedOptions[0].textContent,
+      foodName: document.getElementById("foodName").value.trim(),
+      postcode: document.getElementById("postcode").value.trim(),
+      address: document.getElementById("address").value.trim(),
+      detailAddress: document.getElementById("detailAddress").value.trim()
+    };
+    console.log(data);
+    alert(t().submitSuccess);
+  }
+
+  function escapeHtml(value) {
+    return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  }
+
+  document.getElementById("searchQuery").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") { event.preventDefault(); searchPlace(); }
   });
+  document.addEventListener("keydown", function(event) { if (event.key === "Escape") closeModal(); });
+  changeLanguage("ko");
 </script>
 
 </body>
