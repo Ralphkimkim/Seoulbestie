@@ -336,15 +336,25 @@
     });
   }
 
-  function submitForm(event) {
+  async function submitForm(event) {
     event.preventDefault();
+
     const form = event.target;
-    if (!form.checkValidity()) { form.reportValidity(); return; }
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     if (!document.getElementById("address").value.trim()) {
       alert(t().addressRequired);
       openModal();
       return;
     }
+
+    if (isSubmitting || sessionStorage.getItem("orderSubmitted") === "1") {
+      return;
+    }
+
     const data = {
       language: currentLanguage,
       userId: document.getElementById("userId").value.trim(),
@@ -356,19 +366,41 @@
       address: document.getElementById("address").value.trim(),
       detailAddress: document.getElementById("detailAddress").value.trim()
     };
-    if (isSubmitting || sessionStorage.getItem("orderSubmitted") === "1") return;
 
     isSubmitting = true;
+
     const submitBtn = document.getElementById("submitBtn");
+    const originalButtonText = t().submitBtn;
+
     submitBtn.disabled = true;
     submitBtn.textContent = t().submitting;
 
-    // 현재는 테스트용입니다. Google Sheets 연동 후에는
-    // Apps Script의 성공 응답을 받은 뒤 showCompletionPage(data)를 호출하세요.
-    console.log(data);
-    sessionStorage.setItem("orderSubmitted", "1");
-    sessionStorage.setItem("submittedOrderData", JSON.stringify(data));
-    showCompletionPage(data);
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbxWzZe5Uus98TgDF4r8QlRhHtI3xWVIqvpuZiogMqcv1JbroEqWMpwWm5fRtDbNOj3H/exec", {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(data)
+      });
+
+      sessionStorage.setItem("orderSubmitted", "1");
+      sessionStorage.setItem("submittedOrderData", JSON.stringify(data));
+      showCompletionPage(data);
+
+    } catch (error) {
+      console.error("Google Sheets submission error:", error);
+
+      isSubmitting = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalButtonText;
+
+      const errorMessages = {
+        ko: "전송에 실패했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.",
+        en: "Submission failed. Please check your internet connection and try again.",
+        zh: "提交失败。请检查网络连接后重试。"
+      };
+
+      alert(errorMessages[currentLanguage] || errorMessages.en);
+    }
   }
 
   function showCompletionPage(data) {
