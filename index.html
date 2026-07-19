@@ -47,14 +47,12 @@
       .modal-content { margin-top: 20px; }
     }
   </style>
-
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ6ok_TDzKlb6TTEiqpWuZY50ybfv7PEw&libraries=places&callback=initMapService"></script>
 </head>
 <body>
 
 <div class="container">
   <div class="language-row">
-    <select id="languageSelect" onchange="changeLanguage(this.value)">
+    <select id="languageSelect" onchange="handleLanguageChange(this.value)">
       <option value="ko">한국어</option>
       <option value="en">English</option>
       <option value="zh">中文</option>
@@ -124,7 +122,14 @@
 
 <script>
   let placesService;
+  let mapsScript;
   let currentLanguage = "ko";
+
+  const GOOGLE_MAP_LANGUAGE = {
+    ko: "ko",
+    en: "en",
+    zh: "zh-CN"
+  };
 
   const translations = {
     ko: {
@@ -199,6 +204,43 @@
     document.getElementById("searchQuery").placeholder = lang.searchQueryPlaceholder;
     document.getElementById("searchBtn").value = lang.searchBtn;
     resetSearchResults();
+  }
+
+
+  function loadGoogleMaps(language) {
+    const googleLanguage = GOOGLE_MAP_LANGUAGE[language] || "en";
+
+    if (window.google?.maps?.places) {
+      initMapService();
+      return;
+    }
+
+    if (mapsScript) mapsScript.remove();
+
+    mapsScript = document.createElement("script");
+    const existingApiKey = "AIzaSyBQ6ok_TDzKlb6TTEiqpWuZY50ybfv7PEw";
+
+    mapsScript.src =
+      "https://maps.googleapis.com/maps/api/js" +
+      "?key=" + encodeURIComponent(existingApiKey) +
+      "&libraries=places" +
+      "&language=" + encodeURIComponent(googleLanguage) +
+      "&region=KR" +
+      "&callback=initMapService";
+
+    mapsScript.async = true;
+    mapsScript.defer = true;
+    mapsScript.onerror = function () {
+      document.getElementById("results").innerHTML =
+        '<div class="status error">' + escapeHtml(t().apiFailure) + '</div>';
+    };
+
+    document.head.appendChild(mapsScript);
+  }
+
+  function handleLanguageChange(language) {
+    localStorage.setItem("selectedLanguage", language);
+    location.reload();
   }
 
   function initMapService() {
@@ -309,7 +351,11 @@
     if (event.key === "Enter") { event.preventDefault(); searchPlace(); }
   });
   document.addEventListener("keydown", function(event) { if (event.key === "Escape") closeModal(); });
-  changeLanguage("ko");
+  const savedLanguage = localStorage.getItem("selectedLanguage") || "ko";
+  const languageSelect = document.getElementById("languageSelect");
+  languageSelect.value = savedLanguage;
+  changeLanguage(savedLanguage);
+  loadGoogleMaps(savedLanguage);
 </script>
 
 </body>
