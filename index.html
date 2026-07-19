@@ -1,259 +1,323 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>구글 주소 검색 입력 페이지</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>주소 입력 페이지</title>
+
   <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #F9F9F9 ￼; }
-    .container { background-color: white; padding: 30px; border-radius: 10px; max-width: 500px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .input-group { margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
-    input[type="text"], select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
+    * {
+      box-sizing: border-box;
+    }
 
-    /* 🌟 버튼 색상을 눈에 띄는 파란색으로 강제 고정 (!important) */
-    input[type="button"], button {
-      padding: 10px 15px;
-      background-color: #007BFF ￼ !important;
-      color: white !important;
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 26px;
+      text-align: center;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      height: 52px;
+      padding: 0 14px;
+      border: 1px solid #d0d7de;
+      border-radius: 12px;
+      font-size: 16px;
+      background: #fff;
+    }
+
+    .readonly {
+      background: #f1f3f5;
+    }
+
+    button,
+    input[type="button"] {
+      height: 52px;
       border: none;
-      border-radius: 5px;
+      border-radius: 12px;
+      background: #007bff;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    /* 마우스를 올렸을 때 살짝 진한 파란색으로 변하는 효과 */
-    input[type="button"]:hover, button:hover {
-      background-color: #0056B3 ￼ !important;
     }
 
-    .lang-selector { text-align: right; margin-bottom: 20px; }
-    .readonly-input { background-color: #eee; }
+    button:hover,
+    input[type="button"]:hover {
+      background: #005fd1;
+    }
 
-    /* 주소 검색 모달 팝업 레이아웃 및 스타일 */
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-    .modal-content { background-color: #fff; margin: 15% auto; padding: 25px; border-radius: 10px; max-width: 450px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-    .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #aaa; }
-    .close-btn:hover { color: #000; }
+    .address-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
 
-    /* 모달 내부 입력창 및 버튼 디자인 */
-    .modal-content input[type="text"] { width: 75%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 0; }
-    .modal-content input[type="button"] { width: 22%; padding: 10px; background-color: #007BFF ￼ !important; color: white !important; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .modal-content input[type="button"]:hover { background-color: #0056B3 ￼ !important; }
+    .address-row input[type="text"] {
+      flex: 1;
+    }
 
-    .search-results { max-height: 250px; overflow-y: auto; margin-top: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; }
-    .result-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; text-align: left; }
-    .result-item:hover { background-color: #F1F1F1 ￼; }
-    .result-item:last-child { border-bottom: none; }
-    .no-result { padding: 15px; text-align: center; color: #777; font-size: 14px; line-height: 1.5; }
-    .error-text { color: #DC3545 ￼; font-weight: bold; }
+    .address-row input[type="button"] {
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    #submitBtn {
+      width: 100%;
+      margin-top: 8px;
+      font-size: 17px;
+    }
+
+    /* 모달 */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 640px;
+      margin: 60px auto 0;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-size: 28px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .search-box input[type="text"] {
+      flex: 1;
+    }
+
+    .search-box input[type="button"] {
+      width: 90px;
+      flex-shrink: 0;
+    }
+
+    .results {
+      margin-top: 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .result-item {
+      padding: 14px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+    }
+
+    .result-item:hover {
+      background: #f8fafc;
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .status {
+      padding: 18px;
+      text-align: center;
+      color: #666;
+    }
+
+    .error {
+      color: #dc3545;
+      font-weight: 700;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 18px;
+        border-radius: 16px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      .address-row {
+        flex-direction: column;
+      }
+
+      .address-row input[type="button"] {
+        width: 100%;
+      }
+
+      .search-box {
+        flex-direction: column;
+      }
+
+      .search-box input[type="button"] {
+        width: 100%;
+      }
+
+      .modal-content {
+        margin-top: 20px;
+      }
+    }
   </style>
 
-  <script async src="maps.googleapis.com/maps/api/js?key=AIzaSyBQ6ok_TDzKlb6TTEiqpWuZY50ybfv7PEw&libraries=places&callback=initMapService&…"></script>
+  <!-- ★ 여기 API 키만 교체 -->
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initMapService">
+  </script>
 </head>
 <body>
 
 <div class="container">
-  <div class="lang-selector">
-    <select id="langSelect" onchange="changeLanguage()" style="width: 120px;">
-      <option value="ko">한국어</option>
-      <option value="en">English</option>
-      <option value="zh">中文</option>
-    </select>
-  </div>
+  <h2>정보 입력하기</h2>
 
-  <h2 id="pageTitle">정보 입력하기</h2>
-
-  <form id="myForm" onsubmit="alert('제출 완료되었습니다!'); return false;">
+  <form onsubmit="submitForm(event)">
 
     <div class="input-group">
-      <label id="lblId">ID :</label>
-      <input type="text" id="userId" name="userId" placeholder="请输入小红书ID" required>
+      <label>ID</label>
+      <input type="text" id="userId" placeholder="샤오홍슈 ID 입력" required />
     </div>
 
     <div class="input-group">
-      <label id="lblStage1">1단계 (필수) :</label>
-      <select id="category" name="category" required>
-        <option value="">선택하세요 / Select / 请选择</option>
-        <option value="chicken">Chicken / 炸鸡 (치킨)</option>
-        <option value="pizza">Pizza / 比萨 (피자)</option>
-        <option value="korean">Korean Food / 韩餐 (한식)</option>
-        <option value="tteokbokki">Tteokbokki / 炒年糕 (떡볶이)</option>
-        <option value="snack">Snack Food / 小吃 (분식)</option>
-        <option value="coffee">Coffee / 咖啡 (커피)</option>
-        <option value="burger">Hamburger / 汉堡 (햄버거)</option>
-        <option value="asian">Asian Food / 亚洲菜 (아시안)</option>
+      <label>카테고리</label>
+      <select id="category" required>
+        <option value="">선택하세요</option>
+        <option>치킨</option>
+        <option>피자</option>
+        <option>한식</option>
+        <option>떡볶이</option>
+        <option>커피</option>
+        <option>햄버거</option>
       </select>
     </div>
 
     <div class="input-group">
-      <label id="lblStage2">2단계 (선택) :</label>
-      <input type="text" list="foodList" id="foodName" name="foodName" placeholder="음식명 입력 및 브랜드 직접 입력">
-      <datalist id="foodList">
-        <option value="KFC">
-        <option value="McDonald's">
-        <option value="엽기떡볶이">
-        <option value="교촌치킨">
-      </datalist>
+      <label>브랜드 / 음식명</label>
+      <input type="text" id="foodName" placeholder="예: KFC, 엽기떡볶이" />
     </div>
 
     <div class="input-group">
-      <label id="lblAddress">주소 :</label>
-      <div style="display: flex; gap: 5px; margin-bottom: 5px;">
-        <input type="text" id="postcode" name="postcode" placeholder="우편번호" readonly style="flex: 1; margin-bottom: 0;" class="readonly-input">
-        <input type="button" id="btnSearch" onclick="openAddressSearch()" value="주소 검색">
+      <label>주소</label>
+
+      <div class="address-row">
+        <input type="text" id="postcode" placeholder="우편번호" readonly class="readonly" />
+        <input type="button" value="주소 검색" onclick="openModal()" />
       </div>
-      <input type="text" id="address" name="address" placeholder="기본 주소" readonly style="margin-bottom: 5px;" class="readonly-input">
-      <input type="text" id="detailAddress" name="detailAddress" placeholder="상세 주소를 입력해주세요" style="margin-bottom: 0;">
+
+      <input type="text" id="address" placeholder="기본 주소" readonly class="readonly" style="margin-bottom:8px;" />
+
+      <input type="text" id="detailAddress" placeholder="상세 주소 입력" />
     </div>
 
-    <button type="submit" id="btnSubmit" style="width: 100%; font-size: 16px;">제출하기</button>
+    <button id="submitBtn" type="submit">제출하기</button>
   </form>
 </div>
 
-<div id="searchModal" class="modal">
+<!-- 모달 -->
+<div id="modal" class="modal">
   <div class="modal-content">
-    <span class="close-btn" onclick="closeAddressSearch()">&times;</span>
-    <h3 id="modalTitle" style="margin-top:0; text-align: left;">구글 주소 검색</h3>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <input type="text" id="searchQuery" placeholder="호텔 이름 또는 주소 입력 (영문/중문 가능)" onkeypress="if(event.keyCode==13){searchGooglePlaces(); return false;}">
-      <input type="button" id="btnModalSearch" onclick="searchGooglePlaces()" value="검색">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+
+    <h3>주소 검색</h3>
+
+    <div class="search-box">
+      <input type="text" id="searchQuery" placeholder="건물명 또는 주소 입력" />
+      <input type="button" value="검색" onclick="searchPlace()" />
     </div>
-    <div id="searchResults" class="search-results">
-      <div class="no-result" id="modalStatus">주소 또는 건물명을 입력 후 검색 버튼을 눌러주세요.</div>
+
+    <div id="results" class="results">
+      <div class="status">검색어를 입력하세요.</div>
     </div>
   </div>
 </div>
 
 <script>
-  const translations = {
-    ko: {
-      title: "정보 입력하기",
-      lblId: "ID :",
-      idPlace: "请输入小红书ID (샤오홍슈 아이디 입력)",
-      lblStage1: "1단계 (필수) :",
-      lblStage2: "2단계 (선택) :",
-      stage2Place: "음식명 입력 및 브랜드 직접 입력",
-      lblAddress: "주소 :",
-      btnSearch: "주소 검색",
-      postPlace: "우편번호",
-      addrPlace: "기본 주소",
-      detailPlace: "상세 주소를 입력해주세요",
-      btnSubmit: "제출하기",
-      modalTitle: "구글 주소 검색",
-      modalPlace: "호텔 이름 또는 주소 입력 (영문/중문 가능)",
-      modalBtn: "검색",
-      modalStatus: "주소 또는 건물명을 입력 후 검색 버튼을 눌러주세요.",
-      searching: "검색 중...",
-      noResults: "검색 결과가 없습니다. 다시 입력해 주세요."
-    },
-    en: {
-      title: "Information Form",
-      lblId: "ID :",
-      idPlace: "Please enter your Xiaohongshu ID",
-      lblStage1: "Step 1 (Required) :",
-      lblStage2: "Step 2 (Optional) :",
-      stage2Place: "Enter food name & direct brand input",
-      lblAddress: "Address :",
-      btnSearch: "Search Address",
-      postPlace: "Zipcode",
-      addrPlace: "Basic Address",
-      detailPlace: "Please enter detailed address",
-      btnSubmit: "Submit",
-      modalTitle: "Google Address Search",
-      modalPlace: "Enter Hotel name or Address",
-      modalBtn: "Search",
-      modalStatus: "Enter address or building name and press Search.",
-      searching: "Searching...",
-      noResults: "No results found. Please try again."
-    },
-    zh: {
-      title: "信息输入",
-      lblId: "ID :",
-      idPlace: "请输入小红书ID",
-      lblStage1: "第一步（必填）:",
-      lblStage2: "第二步（选填）:",
-      stage2Place: "输入食品名称及直接输入品牌",
-      lblAddress: "地址 :",
-      btnSearch: "搜索地址",
-      postPlace: "邮政编码",
-      addrPlace: "基本地址",
-      detailPlace: "请输入详细地址",
-      btnSubmit: "提交",
-      modalTitle: "谷歌地址搜索",
-      modalPlace: "输入酒店名称或地址",
-      modalBtn: "搜索",
-      modalStatus: "输入地址或建筑物名称并按搜索。",
-      searching: "正在搜索...",
-      noResults: "未找到结果。请再试一次。"
-    }
-  };
-
-  let currentLang = "ko";
   let placesService;
 
-  function changeLanguage() {
-    currentLang = document.getElementById("langSelect").value;
-    const t = translations[currentLang];
-
-    document.getElementById("pageTitle").innerText = t.title;
-    document.getElementById("lblId").innerText = t.lblId;
-    document.getElementById("userId").placeholder = t.idPlace;
-    document.getElementById("lblStage1").innerText = t.lblStage1;
-    document.getElementById("lblStage2").innerText = t.lblStage2;
-    document.getElementById("foodName").placeholder = t.stage2Place;
-    document.getElementById("lblAddress").innerText = t.lblAddress;
-    document.getElementById("btnSearch").value = t.btnSearch;
-    document.getElementById("postcode").placeholder = t.postPlace;
-    document.getElementById("address").placeholder = t.addrPlace;
-    document.getElementById("detailAddress").placeholder = t.detailPlace;
-    document.getElementById("btnSubmit").innerText = t.btnSubmit;
-
-    document.getElementById("modalTitle").innerText = t.modalTitle;
-    document.getElementById("searchQuery").placeholder = t.modalPlace;
-    document.getElementById("btnModalSearch").value = t.modalBtn;
-    document.getElementById("modalStatus").innerText = t.modalStatus;
-  }
-
   function initMapService() {
-    try {
-      const dummyDiv = document.createElement('div');
-      document.body.appendChild(dummyDiv);
-      placesService = new google.maps.places.PlacesService(dummyDiv);
-    } catch (e) {
-      console.error("구글 맵 서비스 초기화 실패:", e);
-    }
+    const map = new google.maps.Map(document.createElement("div"));
+    placesService = new google.maps.places.PlacesService(map);
   }
-  window.gm_authFailure = function() {
-    alert("구글 지도 API 인증 실패! 다음을 확인해 주세요:\n1. 구글 클라우드에 해외 결제 카드가 등록되었는지\n2. API 키를 코드 상단에 올바르게 입력했는지");
+
+  window.gm_authFailure = function () {
+    alert(
+      "구글 API 인증 실패\\n\\n" +
+      "1. Maps JavaScript API 활성화\\n" +
+      "2. Places API (Legacy) 활성화\\n" +
+      "3. 결제 카드 등록 여부 확인"
+    );
   };
 
-  function openAddressSearch() {
-    document.getElementById("searchModal").style.display = "block";
+  function openModal() {
+    document.getElementById("modal").style.display = "block";
     document.getElementById("searchQuery").focus();
   }
 
-  function closeAddressSearch() {
-    document.getElementById("searchModal").style.display = "none";
+  function closeModal() {
+    document.getElementById("modal").style.display = "none";
     document.getElementById("searchQuery").value = "";
-    document.getElementById("searchResults").innerHTML = `<div class="no-result" id="modalStatus">${translations[currentLang].modalStatus}</div>`;
+    document.getElementById("results").innerHTML =
+      '<div class="status">검색어를 입력하세요.</div>';
   }
 
-  function searchGooglePlaces() {
-    const query = document.getElementById("searchQuery").value;
-    const resultsContainer = document.getElementById("searchResults");
+  async function searchPlace() {
+    const query = document.getElementById("searchQuery").value.trim();
+    const resultsBox = document.getElementById("results");
 
-    if (!query.trim()) return;
+    if (!query) return;
 
-    if (typeof google === 'undefined' || !placesService) {
-      resultsContainer.innerHTML = `
-        <div class="no-result error-text">
-          ⚠️ 구글 서비스 로드 실패!<br>
-          HTML 코드 상단의 API 키를 올바르게 입력하셨는지 확인해 주세요.
-        </div>`;
-      return;
-    }
-
-    resultsContainer.innerHTML = `<div class="no-result">${translations[currentLang].searching}</div>`;
+    resultsBox.innerHTML = '<div class="status">검색 중...</div>';
 
     const request = {
       query: query,
@@ -262,58 +326,102 @@
     };
 
     placesService.textSearch(request, function(results, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
-        resultsContainer.innerHTML = "";
+
+      if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
+
+        resultsBox.innerHTML = "";
 
         results.forEach(place => {
-          const item = document.createElement("div");
-          item.className = "result-item";
-          item.innerHTML = `<strong>${place.name}</strong><br><span style="color:#666; font-size:12px;">${place.formatted_address}</span>`;
 
-          item.onclick = function() {
-            selectAddress(place);
-          };
-          resultsContainer.appendChild(item);
+          const div = document.createElement("div");
+          div.className = "result-item";
+
+          div.innerHTML = `
+            <strong>${place.name}</strong><br>
+            <small>${place.formatted_address}</small>
+          `;
+
+          div.onclick = () => selectPlace(place);
+
+          resultsBox.appendChild(div);
         });
+
       } else {
-        let errorMsg = translations[currentLang].noResults;
+
+        let msg = "검색 결과가 없습니다.";
+
         if (status === "REQUEST_DENIED") {
-          errorMsg = `
-            <span class="error-text">⚠️ 구글 서버 거절 (REQUEST_DENIED)</span><br>
-            구글 클라우드 콘솔에서 <strong>'Places API'</strong> 스위치가 켜져 있는지 반드시 확인해 주세요.`;
-        } else if (status === "OVER_QUERY_LIMIT") {
-          errorMsg = `<span class="error-text">⚠️ 일일 할당량 초과 (결제 카드 미등록 상태)</span>`;
-        } else if (status !== "ZERO_RESULTS") {
-          errorMsg = `<span class="error-text">⚠️ 구글 에러 발생 (Status: ${status})</span>`;
+          msg = '<span class="error">Places API (Legacy) 활성화 필요</span>';
         }
 
-        resultsContainer.innerHTML = `<div class="no-result">${errorMsg}</div>`;
+        if (status === "OVER_QUERY_LIMIT") {
+          msg = '<span class="error">결제 카드 등록 필요</span>';
+        }
+
+        resultsBox.innerHTML = `<div class="status">${msg}</div>`;
       }
     });
   }
 
-  function selectAddress(place) {
-    let postcode = "";
+  function selectPlace(place) {
 
-    if (place.address_components) {
-      for (const component of place.address_components) {
-        if (component.types.includes("postal_code")) {
-          postcode = component.long_name;
-          break;
+    placesService.getDetails(
+      {
+        placeId: place.place_id,
+        fields: ["address_components", "formatted_address"]
+      },
+      function(detail, status) {
+
+        let postcode = "";
+
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+
+          detail.address_components.forEach(c => {
+            if (c.types.includes("postal_code")) {
+              postcode = c.long_name;
+            }
+          });
+
+          document.getElementById("address").value =
+            detail.formatted_address;
+
+        } else {
+
+          document.getElementById("address").value =
+            place.formatted_address;
         }
+
+        document.getElementById("postcode").value = postcode || "N/A";
+
+        closeModal();
+        document.getElementById("detailAddress").focus();
       }
-    }
-
-    document.getElementById("address").value = place.formatted_address;
-    document.getElementById("postcode").value = postcode ? postcode : "N/A";
-
-    closeAddressSearch();
-    document.getElementById("detailAddress").focus();
+    );
   }
 
-  window.onload = function() {
-    changeLanguage();
-  };
+  function submitForm(e) {
+    e.preventDefault();
+
+    const data = {
+      userId: document.getElementById("userId").value,
+      category: document.getElementById("category").value,
+      foodName: document.getElementById("foodName").value,
+      postcode: document.getElementById("postcode").value,
+      address: document.getElementById("address").value,
+      detailAddress: document.getElementById("detailAddress").value
+    };
+
+    console.log(data);
+
+    alert("제출 완료!");
+  }
+
+  document.getElementById("searchQuery").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchPlace();
+    }
+  });
 </script>
 
 </body>
