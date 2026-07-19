@@ -38,6 +38,13 @@
     .result-item:last-child { border-bottom: none; }
     .status { padding: 18px; text-align: center; color: #666; line-height: 1.55; }
     .error { color: #dc3545; font-weight: 700; }
+    .completion-page { display: none; min-height: 70vh; align-items: center; justify-content: center; text-align: center; }
+    .completion-card { width: 100%; padding: 32px 20px; }
+    .completion-icon { width: 74px; height: 74px; margin: 0 auto 20px; border-radius: 50%; background: #e8f7ee; color: #1f9d55; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; }
+    .completion-card h2 { margin-bottom: 12px; }
+    .completion-card p { margin: 0; color: #5f6b76; font-size: 15px; line-height: 1.65; }
+    .completion-summary { margin-top: 24px; padding: 16px; border-radius: 12px; background: #f7f9fb; text-align: left; font-size: 14px; line-height: 1.7; }
+    #submitBtn:disabled { background: #9bbce0; cursor: not-allowed; }
     @media (max-width: 480px) {
       body { padding: 10px; }
       .container { padding: 18px; border-radius: 16px; }
@@ -108,6 +115,15 @@
   </form>
 </div>
 
+<div id="completionPage" class="container completion-page" aria-live="polite">
+  <div class="completion-card">
+    <div class="completion-icon">✓</div>
+    <h2 id="completionTitle">제출이 완료되었습니다</h2>
+    <p id="completionMessage">주문 정보가 정상적으로 접수되었습니다.<br>이 페이지를 닫아 주세요.</p>
+    <div id="completionSummary" class="completion-summary"></div>
+  </div>
+</div>
+
 <div id="modal" class="modal" onclick="handleModalBackground(event)">
   <div class="modal-content">
     <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -124,6 +140,7 @@
   let placesService;
   let mapsScript;
   let currentLanguage = "ko";
+  let isSubmitting = false;
 
   const GOOGLE_MAP_LANGUAGE = {
     ko: "ko",
@@ -142,7 +159,7 @@
       modalTitle: "주소 검색", searchQueryPlaceholder: "건물명 또는 주소 입력", searchBtn: "검색", initialStatus: "검색어를 입력하세요.",
       searching: "검색 중...", noResults: "검색 결과가 없습니다.", apiNotReady: "Google Maps API가 아직 준비되지 않았습니다.",
       placesApiRequired: "Places API (Legacy) 활성화가 필요합니다.", billingRequired: "Google Cloud 결제 계정 연결이 필요합니다.",
-      submitSuccess: "제출 완료!", addressRequired: "주소를 검색해서 선택해 주세요.",
+      submitSuccess: "제출 완료!", completionTitle: "제출이 완료되었습니다", completionMessage: "주문 정보가 정상적으로 접수되었습니다.<br>중복 제출을 방지하기 위해 이 페이지에서는 다시 제출할 수 없습니다.", completionId: "Red Note ID", completionPayer: "입금자명", completionFood: "주문 내용", completionAddress: "주소", submitting: "제출 중...", addressRequired: "주소를 검색해서 선택해 주세요.",
       apiFailure: "구글 API 인증 실패\n\n1. Maps JavaScript API 활성화\n2. Places API (Legacy) 활성화\n3. 결제 카드 등록 여부 확인"
     },
     en: {
@@ -155,7 +172,7 @@
       modalTitle: "Address Search", searchQueryPlaceholder: "Enter a building name or address", searchBtn: "Search", initialStatus: "Enter a search term.",
       searching: "Searching...", noResults: "No results found.", apiNotReady: "Google Maps API is not ready yet.",
       placesApiRequired: "Places API (Legacy) must be enabled.", billingRequired: "A Google Cloud billing account must be connected.",
-      submitSuccess: "Submitted successfully!", addressRequired: "Please search for and select an address.",
+      submitSuccess: "Submitted successfully!", completionTitle: "Submission Complete", completionMessage: "Your order information has been received successfully.<br>To prevent duplicate submissions, this page cannot be submitted again.", completionId: "Red Note ID", completionPayer: "Payment Sender", completionFood: "Order", completionAddress: "Address", submitting: "Submitting...", addressRequired: "Please search for and select an address.",
       apiFailure: "Google API authentication failed.\n\n1. Enable Maps JavaScript API\n2. Enable Places API (Legacy)\n3. Check billing registration"
     },
     zh: {
@@ -168,7 +185,7 @@
       modalTitle: "地址搜索", searchQueryPlaceholder: "请输入建筑名称或地址", searchBtn: "搜索", initialStatus: "请输入搜索内容。",
       searching: "正在搜索...", noResults: "没有找到结果。", apiNotReady: "Google Maps API 尚未准备完成。",
       placesApiRequired: "需要启用 Places API (Legacy)。", billingRequired: "需要连接 Google Cloud 结算账户。",
-      submitSuccess: "提交成功！", addressRequired: "请搜索并选择地址。",
+      submitSuccess: "提交成功！", completionTitle: "提交完成", completionMessage: "您的订单信息已成功提交。<br>为防止重复提交，本页面无法再次提交。", completionId: "Red Note ID", completionPayer: "付款人姓名", completionFood: "订单内容", completionAddress: "地址", submitting: "提交中...", addressRequired: "请搜索并选择地址。",
       apiFailure: "Google API 验证失败。\n\n1. 启用 Maps JavaScript API\n2. 启用 Places API (Legacy)\n3. 检查结算账户"
     }
   };
@@ -339,8 +356,41 @@
       address: document.getElementById("address").value.trim(),
       detailAddress: document.getElementById("detailAddress").value.trim()
     };
+    if (isSubmitting || sessionStorage.getItem("orderSubmitted") === "1") return;
+
+    isSubmitting = true;
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = t().submitting;
+
+    // 현재는 테스트용입니다. Google Sheets 연동 후에는
+    // Apps Script의 성공 응답을 받은 뒤 showCompletionPage(data)를 호출하세요.
     console.log(data);
-    alert(t().submitSuccess);
+    sessionStorage.setItem("orderSubmitted", "1");
+    sessionStorage.setItem("submittedOrderData", JSON.stringify(data));
+    showCompletionPage(data);
+  }
+
+  function showCompletionPage(data) {
+    document.querySelector(".container:not(#completionPage)").style.display = "none";
+    document.getElementById("modal").style.display = "none";
+
+    document.getElementById("completionTitle").textContent = t().completionTitle;
+    document.getElementById("completionMessage").innerHTML = t().completionMessage;
+
+    const food = [data.categoryText, data.foodName].filter(Boolean).join(" / ") || "-";
+    const fullAddress = [data.address, data.detailAddress].filter(Boolean).join(" ");
+
+    document.getElementById("completionSummary").innerHTML =
+      "<strong>" + escapeHtml(t().completionId) + ":</strong> " + escapeHtml(data.userId || "-") + "<br>" +
+      "<strong>" + escapeHtml(t().completionPayer) + ":</strong> " + escapeHtml(data.payerName || "-") + "<br>" +
+      "<strong>" + escapeHtml(t().completionFood) + ":</strong> " + escapeHtml(food) + "<br>" +
+      "<strong>" + escapeHtml(t().completionAddress) + ":</strong> " + escapeHtml(fullAddress || "-");
+
+    const completionPage = document.getElementById("completionPage");
+    completionPage.style.display = "flex";
+    window.scrollTo({ top: 0, behavior: "instant" });
+    history.replaceState(null, "", location.href);
   }
 
   function escapeHtml(value) {
@@ -356,6 +406,16 @@
   languageSelect.value = savedLanguage;
   changeLanguage(savedLanguage);
   loadGoogleMaps(savedLanguage);
+
+  if (sessionStorage.getItem("orderSubmitted") === "1") {
+    try {
+      const savedOrderData = JSON.parse(sessionStorage.getItem("submittedOrderData") || "{}");
+      showCompletionPage(savedOrderData);
+    } catch (error) {
+      sessionStorage.removeItem("orderSubmitted");
+      sessionStorage.removeItem("submittedOrderData");
+    }
+  }
 </script>
 
 </body>
